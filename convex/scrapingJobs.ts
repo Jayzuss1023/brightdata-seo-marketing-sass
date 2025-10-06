@@ -1,6 +1,7 @@
 import { mutation, query, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 import { seoReportSchema } from "@/lib/seo-schema";
+import { clearLine } from "node:readline";
 
 export const asynccreateScrapingJob = mutation({
   args: {
@@ -152,7 +153,7 @@ export const completeJob = internalMutation({
   },
 });
 
-export const failedJob = internalMutation({
+export const failedJob = mutation({
   args: {
     jobId: v.id("scrapingJobs"),
     error: v.string(),
@@ -167,5 +168,158 @@ export const failedJob = internalMutation({
       completedAt: Date.now(),
     });
     return null;
+  },
+});
+
+// Check is a job can use smart retry (has analysis prompt and scraping data)
+export const canUseSmartRetry = query({
+  args: {
+    jobId: v.id("scrapingJobs"),
+    userId: v.string(),
+  },
+  returns: v.object({
+    canRetryAnalysisOnly: v.boolean(),
+    hasScrapingData: v.boolean(),
+    hasAnalysisPrompot: v.boolean(),
+  }),
+  handler: async (ctx, args) => {
+    const job = await ctx.db.get(args.jobId);
+    if (!job || job.userId !== args.userId) {
+      return {
+        canRetryAnalysisOnly: false,
+        hasScrapingData: false,
+        hasAnalysisPrompt: false,
+      };
+    }
+
+    const hasScrapingData = !!(job.results && job.results.length > 0);
+    const hasAnalysisPrompt = !!job.analysisPrompt;
+    const canRetryAnalaysisOnly = hasScrapingData && hasAnalysisPrompt;
+
+    return {
+      hasScrapingData,
+      hasAnalysisPrompt,
+      canRetryAnalaysisOnly,
+    };
+  },
+});
+
+/**
+ Reset a job for analysis retry - clears analysis results but keeps scraping data
+ */
+
+export const resetJobForAnalysisRetry = internalMutation({
+  args: {
+    jobId: v.id("scrapingJobs"),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.jobId, {
+      status: "analyzing",
+      error: undefined, // Clear previous error,
+      completedAt: undefined,
+      seoReport: undefined,
+    });
+
+    return null;
+  },
+});
+
+export const getJobBySnapshotId = query({
+  args: {
+    snapshotId: v.string(),
+    userId: v.string(),
+  },
+  returns: v.union(
+    v.object({
+      _id: id("scrapingJobs"),
+      _creationTime: v.number(),
+      userId: v.string(),
+      originalPrompt: v.string(),
+      analysisPrompt: v.string(),
+      shapshotId: v.optional(v.string()),
+      status: v.union(
+        v.literal("pending"),
+        v.literal("running"),
+        v.literal("analyzing"),
+        v.literal("completed"),
+        v.literal("failed"),
+      ),
+      results: v.optional(v.array(v.any())),
+      saveSeoReport: v.optional(v.any()),
+      error: v.optional(v.string()),
+      createdAt: v.number(),
+      completedAt: v.optional(v.number()),
+    }),
+    v.null(),
+  ),
+  handler: async (ctx, args) => {
+    const job = await ctx.db
+      .query("scrapingJobs")
+      .filter((q) =>
+        q.and(
+          q.eq(q.field("snapshotId"), args.snapshotId),
+          q.eq(q.field("userId"), args.userId),
+        ),
+      )
+      .first();
+
+    if (job && job.seoReport !== undefined) {
+      const result = seoReportSchema.safeParse(job.seoReport);
+      if (!result.success) {
+        throw new Error("Stored seoReport failed validation.");
+      }
+    }
+    return job;
+  },
+});
+
+export const getUserJobs = query({
+  args: {},
+  returns: v.array(
+    v.object({
+      _id: v.id("scrapingJobs"),
+      _creationTime: v.number(),
+      userId: v.string(),
+      originalPrompt: v.string(),
+      analysisPrompt: v.optional(v.string()),
+      snapshotId: v.optional(v.string()),
+      status: v.union(
+        v.literal("pending"),
+        v.literal("running"),
+        v.literal("analyzing"),
+        v.literal("completed"),
+        v.literal("failed"),
+      ),
+      results: v.optional(v.array(v.any())),
+      saveSeoReport: v.optional(v.any()),
+      error: v.optional(v.string()),
+      createdAt: v.number(),
+      completedAt: v.optional(v.number()),
+    }),
+  ),
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    const jobs = await ctx.db
+      .query("scrapingJobs")
+      .withIndex("by_user_and_created_at", (q) =>
+        q.eq("userId", identity.subject),
+      )
+      .order("desc")
+      .collect();
+
+    for (const job of jobs) {
+      if (job.seoReport !== undefined) {
+        const result = seoReportSchema.safeParse(job.seoReport);
+        if (!result.success) {
+          throw new Error("Stored seoReport faile validation");
+        }
+      }
+    }
+    return jobs;
   },
 });
