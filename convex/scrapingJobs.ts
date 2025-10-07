@@ -3,7 +3,7 @@ import { v } from "convex/values";
 import { seoReportSchema } from "@/lib/seo-schema";
 import { clearLine } from "node:readline";
 
-export const asynccreateScrapingJob = mutation({
+export const createScrapingJob = mutation({
   args: {
     originalPrompt: v.string(),
     userId: v.optional(v.string()),
@@ -180,7 +180,7 @@ export const canUseSmartRetry = query({
   returns: v.object({
     canRetryAnalysisOnly: v.boolean(),
     hasScrapingData: v.boolean(),
-    hasAnalysisPrompot: v.boolean(),
+    hasAnalysisPrompt: v.boolean(),
   }),
   handler: async (ctx, args) => {
     const job = await ctx.db.get(args.jobId);
@@ -194,12 +194,12 @@ export const canUseSmartRetry = query({
 
     const hasScrapingData = !!(job.results && job.results.length > 0);
     const hasAnalysisPrompt = !!job.analysisPrompt;
-    const canRetryAnalaysisOnly = hasScrapingData && hasAnalysisPrompt;
+    const canRetryAnalysisOnly = hasScrapingData && hasAnalysisPrompt;
 
     return {
       hasScrapingData,
       hasAnalysisPrompt,
-      canRetryAnalaysisOnly,
+      canRetryAnalysisOnly,
     };
   },
 });
@@ -232,11 +232,11 @@ export const getJobBySnapshotId = query({
   },
   returns: v.union(
     v.object({
-      _id: id("scrapingJobs"),
+      _id: v.id("scrapingJobs"),
       _creationTime: v.number(),
       userId: v.string(),
       originalPrompt: v.string(),
-      analysisPrompt: v.string(),
+      analysisPrompt: v.optional(v.string()),
       shapshotId: v.optional(v.string()),
       status: v.union(
         v.literal("pending"),
@@ -246,7 +246,7 @@ export const getJobBySnapshotId = query({
         v.literal("failed"),
       ),
       results: v.optional(v.array(v.any())),
-      saveSeoReport: v.optional(v.any()),
+      seoReport: v.optional(v.any()),
       error: v.optional(v.string()),
       createdAt: v.number(),
       completedAt: v.optional(v.number()),

@@ -44,3 +44,5 @@ const retryAnalysisOnly = async (jobId: string) => {
     };
   }
 };
+
+export default retryAnalysisOnly;
