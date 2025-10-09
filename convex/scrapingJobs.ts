@@ -153,7 +153,7 @@ export const completeJob = internalMutation({
   },
 });
 
-export const failedJob = mutation({
+export const failJob = mutation({
   args: {
     jobId: v.id("scrapingJobs"),
     error: v.string(),
@@ -166,6 +166,25 @@ export const failedJob = mutation({
       status: "failed",
       error: args.error,
       completedAt: Date.now(),
+    });
+    return null;
+  },
+});
+
+export const retryJob = mutation({
+  args: {
+    jobId: v.id("scrapingJobs"),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    // Reset the job to pending status and clear error, results, and old snapshotId
+    await ctx.db.patch(args.jobId, {
+      status: "pending",
+      error: undefined,
+      completedAt: undefined,
+      results: undefined,
+      seoReport: undefined,
+      snapshotId: undefined, // Clear old snapshotId so new one becomes the report ID
     });
     return null;
   },

@@ -35,6 +35,14 @@ function DashboardPage() {
 
     try {
       const response = await startScraping(prompt, undefined, country);
+
+      if (response.ok) {
+        console.log(response.data);
+        const snapshoptId = response.data.snapshot_id;
+        router.push(`/dashboard/report/${snapshoptId}`);
+      } else {
+        console.error(response.error);
+      }
     } finally {
       setIsLoading(false);
     }

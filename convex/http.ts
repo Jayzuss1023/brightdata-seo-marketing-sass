@@ -27,7 +27,43 @@ http.route({
     let job: Job | null = null;
 
     try {
-      const data = req.json();
+      const data = await req.json();
+      console.log("Webhook received data: ", data);
+
+      // Extract Job ID from the webhook URL query parameters
+      const url = new URL(req.url);
+      const jobId = url.searchParams.get("jobId");
+
+      if (!jobId) {
+        console.error("No Job ID found in webhook data: ", data);
+        return new Response("No Job ID found", { status: 400 });
+      }
+
+      // Find the job by ID
+      job = await ctx.runQuery(api.scrapingJobs.getJobById, {
+        jobId: jobId as Id<"scrapingJobs">,
+      });
+
+      if (!job) {
+        console.error(`No job found for Job ID: ${jobId}`);
+        return new Response(`no job found for Job id: ${jobId}`, {
+          status: 400,
+        });
+      }
+
+      // Step 1: Save raw scraping data first from brightdata
+      const rawResults = Array.isArray(data) ? data : [data];
+      await ctx.runMutation(internal.scrapingJobs.saveRawScrapingData, {
+        jobId: job._id,
+        rawData: rawResults,
+      });
+
+      console.log("Raw scraping data saved for job: ", job._id);
+
+      // Step 2: Schedule AI analysis as background job
+      await ctx.scheduler.runAfter(0, internal.analysis.runAnalysis, {
+        jobId: job._id,
+      });
     } catch (error) {}
 
     const body = await req.bytes();
