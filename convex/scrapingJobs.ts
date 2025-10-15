@@ -171,25 +171,6 @@ export const failJob = mutation({
   },
 });
 
-export const retryJob = mutation({
-  args: {
-    jobId: v.id("scrapingJobs"),
-  },
-  returns: v.null(),
-  handler: async (ctx, args) => {
-    // Reset the job to pending status and clear error, results, and old snapshotId
-    await ctx.db.patch(args.jobId, {
-      status: "pending",
-      error: undefined,
-      completedAt: undefined,
-      results: undefined,
-      seoReport: undefined,
-      snapshotId: undefined, // Clear old snapshotId so new one becomes the report ID
-    });
-    return null;
-  },
-});
-
 // Check is a job can use smart retry (has analysis prompt and scraping data)
 export const canUseSmartRetry = query({
   args: {
@@ -256,7 +237,7 @@ export const getJobBySnapshotId = query({
       userId: v.string(),
       originalPrompt: v.string(),
       analysisPrompt: v.optional(v.string()),
-      shapshotId: v.optional(v.string()),
+      snapshotId: v.optional(v.string()),
       status: v.union(
         v.literal("pending"),
         v.literal("running"),

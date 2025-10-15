@@ -64,7 +64,38 @@ http.route({
       await ctx.scheduler.runAfter(0, internal.analysis.runAnalysis, {
         jobId: job._id,
       });
-    } catch (error) {}
+
+      console.log(`
+        Analysis scheduled for job ${job._id}, webhook returning immediately
+        `);
+
+      return new Response("Success", { status: 200 });
+    } catch (error) {
+      console.error("Webhook error: ", error);
+
+      // Set job status to failed when analysis fails (Only if job was found)
+      if (job) {
+        try {
+          await ctx.runMutation(api.scrapingJobs.failJob, {
+            jobId: job._id,
+            error:
+              error instanceof Error
+                ? error.message
+                : "Unknown error occured during analysis",
+          });
+        } catch (failError) {
+          console.error("Failed up update job status to failed: ", failError);
+        }
+      }
+
+      // If it's a schema validation error, provide more specific feedback
+      if (error instanceof Error && error.message.includes("schema")) {
+        console.error("Schema validation failed - AI response incomplete");
+        console.error("Error details: ", error.message);
+      }
+
+      return new Response("Internal Server Error", { status: 500 });
+    }
 
     const body = await req.bytes();
     return new Response(body, { status: 200 });

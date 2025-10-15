@@ -1,10 +1,10 @@
-//lib/seo-schema.ts
+// lib/seo-schema.ts
 // Zod schema for SEO report validation - focused on content analysis from scraping data
 // Removed SERP and on-page sections that require different data sources
 
 import { z } from "zod";
 
-// Base Schemas
+// Base schemas
 const evidenceSchema = z.object({
   url: z.string(),
   quote: z.string().nullable(),
@@ -14,10 +14,10 @@ const evidenceSchema = z.object({
 const sourceSchema = z.object({
   title: z.string(),
   url: z.string(),
-  description: z.string().nullable(),
+  description: z.string().nullable(), // Allow null for missing descriptions
 });
 
-// Main SEO report Schema
+// Main SEO report schema
 export const seoReportSchema = z.object({
   meta: z.object({
     entity_name: z.string(),
@@ -29,7 +29,7 @@ export const seoReportSchema = z.object({
       "website",
       "unknown",
     ]),
-    analysis_data: z.string(),
+    analysis_date: z.string(),
     data_sources_count: z.number(),
     confidence_score: z.number().min(0).max(1),
   }),
@@ -37,120 +37,122 @@ export const seoReportSchema = z.object({
   inventory: z.object({
     total_sources: z.number(),
     unique_domains: z.array(z.string()),
-    source_types: z.object({
-      // Existing categories remain supported
-      social_media: z
-        .array(
-          z.object({
-            domain: z.string(),
-            url: z.string(),
-            title: z.string(),
-            description: z.string().nullable,
-            quality_score: z.number().min(0).max(0).optional(),
-          }),
-        )
-        .optional(),
-      professional: z
-        .array(
-          z.object({
-            domain: z.string(),
-            url: z.string(),
-            title: z.string(),
-            description: z.string().nullable,
-            quality_score: z.number().min(0).max(0).optional(),
-          }),
-        )
-        .optional(),
-      educational: z
-        .array(
-          z.object({
-            domain: z.string(),
-            url: z.string(),
-            title: z.string(),
-            description: z.string().nullable,
-            quality_score: z.number().min(0).max(0).optional(),
-          }),
-        )
-        .optional(),
-      community: z
-        .array(
-          z.object({
-            domain: z.string(),
-            url: z.string(),
-            title: z.string(),
-            description: z.string().nullable,
-            quality_score: z.number().min(0).max(0).optional(),
-          }),
-        )
-        .optional(),
-      news: z
-        .array(
-          z.object({
-            domain: z.string(),
-            url: z.string(),
-            title: z.string(),
-            description: z.string().nullable,
-            quality_score: z.number().min(0).max(0).optional(),
-          }),
-        )
-        .optional(),
-      other: z
-        .array(
-          z.object({
-            domain: z.string(),
-            url: z.string(),
-            title: z.string(),
-            description: z.string().nullable,
-            quality_score: z.number().min(0).max(0).optional(),
-          }),
-        )
-        .optional(),
-      // New categories referenced in the update prompt
-      official: z
-        .array(
-          z.object({
-            domain: z.string(),
-            url: z.string(),
-            title: z.string(),
-            description: z.string().nullable,
-            quality_score: z.number().min(0).max(0).optional(),
-          }),
-        )
-        .optional(),
-      media: z
-        .array(
-          z.object({
-            domain: z.string(),
-            url: z.string(),
-            title: z.string(),
-            description: z.string().nullable,
-            quality_score: z.number().min(0).max(0).optional(),
-          }),
-        )
-        .optional(),
-      review: z
-        .array(
-          z.object({
-            domain: z.string(),
-            url: z.string(),
-            title: z.string(),
-            description: z.string().nullable,
-            quality_score: z.number().min(0).max(0).optional(),
-          }),
-        )
-        .optional(),
-
-      date_range: z.object({
-        earliest: z.string().nullable(),
-        latest: z.string().nullable(),
-      }),
+    source_types: z
+      .object({
+        // Existing categories remain supported
+        social_media: z
+          .array(
+            z.object({
+              domain: z.string(),
+              url: z.string(),
+              title: z.string(),
+              description: z.string().nullable(),
+              quality_score: z.number().min(0).max(1).optional(),
+            }),
+          )
+          .optional(),
+        professional: z
+          .array(
+            z.object({
+              domain: z.string(),
+              url: z.string(),
+              title: z.string(),
+              description: z.string().nullable(),
+              quality_score: z.number().min(0).max(1).optional(),
+            }),
+          )
+          .optional(),
+        educational: z
+          .array(
+            z.object({
+              domain: z.string(),
+              url: z.string(),
+              title: z.string(),
+              description: z.string().nullable(),
+              quality_score: z.number().min(0).max(1).optional(),
+            }),
+          )
+          .optional(),
+        community: z
+          .array(
+            z.object({
+              domain: z.string(),
+              url: z.string(),
+              title: z.string(),
+              description: z.string().nullable(),
+              quality_score: z.number().min(0).max(1).optional(),
+            }),
+          )
+          .optional(),
+        news: z
+          .array(
+            z.object({
+              domain: z.string(),
+              url: z.string(),
+              title: z.string(),
+              description: z.string().nullable(),
+              quality_score: z.number().min(0).max(1).optional(),
+            }),
+          )
+          .optional(),
+        other: z
+          .array(
+            z.object({
+              domain: z.string(),
+              url: z.string(),
+              title: z.string(),
+              description: z.string().nullable(),
+              quality_score: z.number().min(0).max(1).optional(),
+            }),
+          )
+          .optional(),
+        // New categories referenced in the updated prompt
+        official: z
+          .array(
+            z.object({
+              domain: z.string(),
+              url: z.string(),
+              title: z.string(),
+              description: z.string().nullable(),
+              quality_score: z.number().min(0).max(1).optional(),
+            }),
+          )
+          .optional(),
+        media: z
+          .array(
+            z.object({
+              domain: z.string(),
+              url: z.string(),
+              title: z.string(),
+              description: z.string().nullable(),
+              quality_score: z.number().min(0).max(1).optional(),
+            }),
+          )
+          .optional(),
+        review: z
+          .array(
+            z.object({
+              domain: z.string(),
+              url: z.string(),
+              title: z.string(),
+              description: z.string().nullable(),
+              quality_score: z.number().min(0).max(1).optional(),
+            }),
+          )
+          .optional(),
+      })
+      .optional(),
+    date_range: z.object({
+      earliest: z.string().nullable(),
+      latest: z.string().nullable(),
     }),
   }),
+
   content_analysis: z.object({
     content_themes: z.array(
       z.object({
         theme: z.string(),
-        frquency: z.number(),
+        frequency: z.number(),
         intent: z
           .enum(["informational", "navigational", "transactional"])
           .optional(),
@@ -159,7 +161,7 @@ export const seoReportSchema = z.object({
       }),
     ),
     sentiment: z.object({
-      overal: z.enum(["positive", "neutral", "negative", "mixed"]),
+      overall: z.enum(["positive", "neutral", "negative", "mixed"]),
     }),
   }),
 
@@ -170,12 +172,13 @@ export const seoReportSchema = z.object({
           keyword: z.string(),
           intent: z
             .enum([
-              "infornation",
+              "informational",
               "navigational",
               "transactional",
               "commercial",
             ])
             .optional(),
+          evidence: z.array(evidenceSchema),
         }),
       )
       .max(25),
@@ -193,12 +196,12 @@ export const seoReportSchema = z.object({
   competitors: z
     .array(
       z.object({
-        name: z.string().nullable(),
+        name: z.string().nullable(), // Competitor names might not be available
         domain: z.string(),
         strength_score: z.number().min(0).max(10),
         overlap_keywords: z.array(z.string()),
         unique_advantages: z.array(z.string()),
-        relationship: z.enum(["competitor", "employer", "partner", "unkown"]),
+        relationship: z.enum(["competitor", "employer", "partner", "unknown"]),
         evidence: z.array(evidenceSchema),
       }),
     )
@@ -234,13 +237,13 @@ export const seoReportSchema = z.object({
         url: z.string(),
         title: z.string(),
         description: z.string().nullable(),
-        link_type: z.enum(["dowfollow", "nofollow", "unkown"]).optional(),
+        link_type: z.enum(["dofollow", "nofollow", "unknown"]).optional(),
         evidence: z.array(evidenceSchema),
       }),
     ),
   }),
 
-  recmmendations: z
+  recommendations: z
     .array(
       z.object({
         category: z.enum([
@@ -263,7 +266,7 @@ export const seoReportSchema = z.object({
       }),
     )
     .max(25)
-    .optional(),
+    .optional(), // Make optional to handle incomplete AI responses
 
   summary: z
     .object({
@@ -273,10 +276,10 @@ export const seoReportSchema = z.object({
       quick_wins: z.array(z.string()).optional(),
       long_term_opportunities: z.array(z.string()).optional(),
     })
-    .optional(),
+    .optional(), // Make optional to handle incomplete AI responses
 });
 
-// Scraping data schemas - Matches the ScrapingDataItem interface from prompts/gpt.ts
+// Scraping data schema - matches the ScrapingDataItem interface from prompts/gpt.ts
 export const scrapingDataSchema = z.object({
   url: z.string(),
   prompt: z.string(),
@@ -285,7 +288,7 @@ export const scrapingDataSchema = z.object({
   timestamp: z.string(),
 });
 
-// Type interface from schema - single source of truth
+// Type inference from schema - single source of truth
 export type SeoReport = z.infer<typeof seoReportSchema>;
 export type ScrapingData = z.infer<typeof scrapingDataSchema>;
 
@@ -300,14 +303,14 @@ export type ContentKeyword = NonNullable<
 export type Competitor = SeoReport["competitors"][0];
 export type SocialPresence = SeoReport["social_presence"];
 export type BacklinkAnalysis = SeoReport["backlink_analysis"];
-export type Reccomendation = NonNullable<SeoReport["recmmendations"]>[0];
+export type Recommendation = NonNullable<SeoReport["recommendations"]>[0];
 export type Summary = SeoReport["summary"];
 export type Evidence = NonNullable<
   NonNullable<SeoReport["content_analysis"]["content_themes"]>[0]
->;
+>["evidence"][0];
 export type Source = ScrapingData["sources"][0];
 
-// Enhanced type for the updated prompt requirements
+// Enhanced types for the updated prompt requirements
 export type SentimentAnalysis = NonNullable<
   SeoReport["content_analysis"]["sentiment"]
 >;
@@ -315,7 +318,7 @@ export type SourceType = keyof NonNullable<
   SeoReport["inventory"]["source_types"]
 >;
 export type EntityType = SeoReport["meta"]["entity_type"];
-export type ReccomendationCategory = Reccomendation["category"];
+export type RecommendationCategory = Recommendation["category"];
 export type CompetitorRelationship = Competitor["relationship"];
 export type SocialPlatform = NonNullable<
   SeoReport["social_presence"]["platforms"]

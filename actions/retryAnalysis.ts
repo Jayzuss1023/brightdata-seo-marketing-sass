@@ -31,7 +31,7 @@ const retryAnalysisOnly = async (jobId: string) => {
     console.error("Failed to retry analysis: ", error);
 
     // Mark job as failed
-    await convex.mutation(api.scrapingJobs.failedJob, {
+    await convex.mutation(api.scrapingJobs.failJob, {
       jobId: jobId as Id<"scrapingJobs">,
       error:
         error instanceof Error ? error.message : "Failed to retry analysis",
