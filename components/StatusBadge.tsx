@@ -14,11 +14,15 @@ export default function StatusBadge({
 }: StatusBadgeProps) {
   const config = getStatusConfig(status);
   const IconComponent = config.icon;
+  const configLabel = config.label.toString();
+  console.log(config.label);
 
   return (
-    <Badge className={config.className}>
-      {showIcon && <IconComponent className="w-3 h-3 mr-1" />}
-      {config.label}
-    </Badge>
+    <div className="flex gap-2">
+      <Badge className={config.className}>
+        {showIcon && <IconComponent className="w-3 h-3 mr-1" />}
+      </Badge>
+      {configLabel}
+    </div>
   );
 }

@@ -32,6 +32,7 @@ import {
 } from "@/lib/status-utils";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import startScraping from "@/actions/startScraping";
 
 const ReportPage = () => {
   const { id } = useParams();
@@ -49,6 +50,29 @@ const ReportPage = () => {
     if (!job) return null;
 
     setRetryError(null);
+
+    startTransition(async () => {
+      try {
+        const result = await startScraping(job.originalPrompt, job._id);
+        if (result.ok) {
+          if (result.smartRetry) {
+            // Stay on current page. Job will update in real time
+            console.log("Smart retry initiated. Staying on current page");
+            return; // Explicitly return to complete the transition
+          } else if (result.data?.snapshotId) {
+            // Full retry with new snapshot - Redirect to new report page.
+            router.replace(`/dashboard/report/${result.data.snapshotId}`);
+            return; // Explicitly return to complete the transition
+          }
+        } else {
+          setRetryError(result.error || "Failed to retry job");
+        }
+      } catch (error) {
+        setRetryError(
+          error instanceof Error ? error.message : "Unknown error occurred.",
+        );
+      }
+    });
   };
 
   if (!id) {
@@ -232,7 +256,12 @@ const ReportPage = () => {
 
             {job.status === "failed" && (
               <div className="flex flex-col items-center gap-2">
-                <Button variant="default" size="lg" className="cursor-pointer">
+                <Button
+                  variant="default"
+                  size="lg"
+                  className="cursor-pointer"
+                  onClick={handleRetry}
+                >
                   {isPending ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin mr-2" />

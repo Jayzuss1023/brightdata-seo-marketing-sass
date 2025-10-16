@@ -120,3 +120,29 @@ export const runAnalysis = internalAction({
     }
   },
 });
+
+/**
+ * Retry analysis for a job that already has scraping data.
+ * This is used for smart retries when analysis fails but scraping succeeded.
+ */
+export const retryAnalysisOnly = action({
+  args: {
+    jobId: v.id("scrapingJobs"),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    console.log("Retrying analysis only for job:", args.jobId);
+
+    // Reset job status and clear previous analysis results
+    await ctx.runMutation(internal.scrapingJobs.resetJobForAnalysisRetry, {
+      jobId: args.jobId,
+    });
+
+    // Run the analysis by calling the internal action
+    await ctx.runAction(internal.analysis.runAnalysis, {
+      jobId: args.jobId,
+    });
+
+    return null;
+  },
+});

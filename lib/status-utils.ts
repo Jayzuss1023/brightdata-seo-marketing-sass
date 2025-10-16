@@ -22,8 +22,8 @@ export function getProgressPercentage(status: string): string {
   const progressMap = {
     pending: "0%",
     running: "25%",
-    analyzing: "50%",
-    completed: "75%",
+    analyzing: "75%",
+    completed: "100%",
     failed: "Error",
   };
 
@@ -82,28 +82,24 @@ export function getStatusConfig(status: string) {
     running: {
       icon: HardDriveDownload,
       label: "Scraping",
-      variant: "secondary" as const,
       className:
         "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800 dark:hover:bg-blue-900/30",
     },
     analyzing: {
       icon: BarChart3,
       label: "Analyzing",
-      variant: "secondary" as const,
       className:
         "bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100 dark:bg-purple-900/20 dark:text-purple-300 dark:border-purple-800 dark:hover:bg-purple-900/30",
     },
     completed: {
       icon: CheckCircle,
-      label: "Completed",
-      variant: "default" as const,
+      label: "done",
       className:
         "bg-green-50 text-green-700 border-green-200 hover:bg-green-100 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800 dark:hover:bg-green-900/30",
     },
     failed: {
       icon: XCircle,
       label: "Failed",
-      variant: "destructive" as const,
       className:
         "bg-red-50 text-red-700 border-red-200 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800 dark:hover:bg-red-900/30",
     },
