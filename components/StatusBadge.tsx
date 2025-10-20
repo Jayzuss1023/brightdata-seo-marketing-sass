@@ -15,13 +15,12 @@ export default function StatusBadge({
   const config = getStatusConfig(status);
   const IconComponent = config.icon;
   const configLabel = config.label.toString();
-  console.log(config.label);
+  const configClass = config.className.toString();
+  console.log(configClass);
 
   return (
-    <div className="flex gap-2">
-      <Badge className={config.className}>
-        {showIcon && <IconComponent className="w-3 h-3 mr-1" />}
-      </Badge>
+    <div className={`flex gap-2 w-fit px-3 py-1 rounded-sm ${configClass}`}>
+      <Badge>{showIcon && <IconComponent className="w-3 h-3 mr-1" />}</Badge>
       {configLabel}
     </div>
   );

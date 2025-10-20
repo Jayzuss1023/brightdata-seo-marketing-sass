@@ -93,7 +93,7 @@ export function getStatusConfig(status: string) {
     },
     completed: {
       icon: CheckCircle,
-      label: "done",
+      label: "Completed",
       className:
         "bg-green-50 text-green-700 border-green-200 hover:bg-green-100 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800 dark:hover:bg-green-900/30",
     },
