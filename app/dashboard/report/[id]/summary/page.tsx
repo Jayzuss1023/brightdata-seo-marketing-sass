@@ -14,7 +14,12 @@ import {
   SourceDistributionChart,
   SummaryHeader,
   CompetitorStrengthCard,
+  RecommendationsCard,
+  KeywordsAnalysisGrid,
+  KeyInsightsGrid,
+  AdditionalAnalysisGrid,
 } from "./ui";
+import AIChat from "../../../../../components/AIChat";
 
 function SummaryPage() {
   const { id } = useParams<{ id: string }>();
@@ -59,19 +64,22 @@ function SummaryPage() {
         <OverallScoreCard seoReport={seoReport} />
         <KeyMetricsGrid seoReport={seoReport} />
 
-        {/* <Protect plan="pro" fallback={<AIChatUpsellCard />}> */}
-        {/* <AIChat seoReportId={id} /> */}
-        {/* </Protect> */}
+        <Protect
+          plan="pro"
+          // fallback={<AIChatUpsellCard />}
+        >
+          <AIChat seoReportId={id} />
+        </Protect>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8">
           <SourceDistributionChart seoReport={seoReport} />
           <CompetitorStrengthCard seoReport={seoReport} />
         </div>
 
-        {/* <RecommendationsCard seoReport={seoReport} /> */}
-        {/* <KeywordsAnalysisGrid seoReport={seoReport} /> */}
-        {/* <KeyInsightsGrid seoReport={seoReport} /> */}
-        {/* <AdditionalAnalysisGrid seoReport={seoReport} /> */}
+        <RecommendationsCard seoReport={seoReport} />
+        <KeywordsAnalysisGrid seoReport={seoReport} />
+        <KeyInsightsGrid seoReport={seoReport} />
+        <AdditionalAnalysisGrid seoReport={seoReport} />
       </div>
     </div>
   );
