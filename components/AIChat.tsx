@@ -2,14 +2,12 @@ import React from "react";
 
 import { useChat } from "@ai-sdk/react";
 import { useState, useRef, useEffect } from "react";
-import { MessageCircle, X, Send, Loader2, Crown, Loader } from "lucide-react";
+import { MessageCircle, X, Send, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import ReactMarkDown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { metadata } from "@/app/layout";
-import { Badge } from "@/components/ui/badge";
 
 function AIChat({ seoReportId }: { seoReportId: string }) {
   const [input, setInput] = useState("");
@@ -97,22 +95,31 @@ function AIChat({ seoReportId }: { seoReportId: string }) {
                         case "input-streaming":
                         case "input-available":
                           return (
-                            <div>
-                              <Loader2 />
+                            <div
+                              key={`${message.id}-${i}`}
+                              className="flex items-center gap-2 text-sm text-gray-600"
+                            >
+                              <Loader2 className="w-4 h-4 animate-spin" />
                               <span>Searching the web...</span>
                             </div>
                           );
 
                         case "output-available":
                           return (
-                            <div key={`${message.id}-${i}`}>
+                            <div
+                              key={`${message.id}-${i}`}
+                              className="text-sm text-green-600 font-medium"
+                            >
                               ✓ Finished web search
                             </div>
                           );
 
                         case "output-error":
                           return (
-                            <div key={`${message.id}-${i}`}>
+                            <div
+                              key={`${message.id}-${i}`}
+                              className="text-sm text-red-600"
+                            >
                               ✗ Web search failed: {part.errorText}
                             </div>
                           );
@@ -121,7 +128,10 @@ function AIChat({ seoReportId }: { seoReportId: string }) {
 
                     if (part.type === "text") {
                       return (
-                        <div>
+                        <div
+                          key={`${message.id}-${i}`}
+                          className="leading-relaxed"
+                        >
                           <ReactMarkDown
                             remarkPlugins={[remarkGfm]}
                             components={{

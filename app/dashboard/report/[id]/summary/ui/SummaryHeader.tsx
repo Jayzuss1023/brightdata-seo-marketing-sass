@@ -2,8 +2,7 @@
 
 import React from "react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { CheckCircle, Download, Share2 } from "lucide-react";
+import { CheckCircle } from "lucide-react";
 import { SeoReport } from "@/lib/seo-schema";
 
 interface SummaryHeaderProps {

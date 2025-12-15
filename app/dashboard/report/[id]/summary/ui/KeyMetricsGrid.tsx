@@ -76,7 +76,7 @@ export function KeyMetricsGrid({ seoReport }: KeyMetricsGridprops) {
               <div className="space-y-1 max-h-24 overflow-y-auto">
                 {seoReport.inventory.unique_domains.map((domain, index) => (
                   <div
-                    key={domain}
+                    key={index}
                     className="text-xs text-muted-foreground truncte bg-green-50 dark:bg-green-900/20 px-2 py-1 rounded"
                   >
                     {domain}

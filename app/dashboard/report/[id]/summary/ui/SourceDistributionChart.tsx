@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/chart";
 import { Pie, PieChart, Cell } from "recharts";
 import { Globe } from "lucide-react";
-import { SeoReport, Source } from "@/lib/seo-schema";
+import { SeoReport } from "@/lib/seo-schema";
 
 interface SourceDistributionChartProps {
   seoReport: SeoReport;

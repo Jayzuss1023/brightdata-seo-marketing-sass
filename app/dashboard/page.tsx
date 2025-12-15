@@ -1,7 +1,5 @@
 "use client";
 
-import Layout from "./layout";
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
