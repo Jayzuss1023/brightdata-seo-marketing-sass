@@ -1,52 +1,35 @@
-# Welcome to your Convex + Next.js + Clerk app
+Full-stack app that turns a business name, product, or site into an SEO report. It scrapes SERP-style results with Bright Data’s Perplexity scraper, then uses GPT to turn that raw data into a structured report.
 
-This is a [Convex](https://convex.dev/) project created with [`npm create convex`](https://www.npmjs.com/package/create-convex).
+Built with Next.js, Convex, Clerk, and the Vercel AI SDK.
 
-After the initial setup (<2 minutes) you'll have a working full-stack app using:
+## What it does
 
-- Convex as your backend (database, server logic)
-- [React](https://react.dev/) as your frontend (web page interactivity)
-- [Next.js](https://nextjs.org/) for optimized web hosting and page routing
-- [Tailwind](https://tailwindcss.com/) for building great looking accessible UI
-- [Clerk](https://clerk.com/) for authentication
+- Sign in with Clerk, then create a report from the dashboard.
+- Kick off a Bright Data scrape, store the job in Convex, and wait on a webhook when the snapshot is ready.
+- Run GPT-4o against the scrape results with a Zod schema so the report stays structured (scores, keywords, sources, recommendations, etc.).
+- Show a live job status, then a summary with charts and cards.
+- Chat with an AI agent that’s been given access to the report so you can ask what the numbers actually mean.
+- Retry a failed **analysis** without re-scraping when the raw data is already saved.
+- Pricing page uses Clerk Billing (`PricingTable`).
 
-## Get started
+Job statuses: `pending` -> `running` -> `analyzing` -> `completed` (or `failed`).
 
-If you just cloned this codebase and didn't use `npm create convex`, run:
+## How a report is generated
 
-```
-npm install
-npm run dev
-```
+1. Dashboard form calls the `startScraping` server action.
+2. A `scrapingJobs` document is created and Bright Data is called with a webhook URL that includes the job id.
+3. `convex/http.ts` receives the snapshot, saves raw results, and schedules `runAnalysis`.
+4. `convex/analysis.ts` builds a prompt, calls `generateObject` with `seoReportSchema`, and stores `seoReport` on the job.
+5. The report pages and `AIChat` read that document in real time from Convex.
 
-If you're reading this README on GitHub and want to use this template, run:
+## Tech stack
 
-```
-npm create convex@latest -- -t nextjs-clerk
-```
-
-Then:
-
-1. Open your app. There should be a "Claim your application" button from Clerk in the bottom right of your app.
-2. Follow the steps to claim your application and link it to this app.
-3. Follow step 3 in the [Convex Clerk onboarding guide](https://docs.convex.dev/auth/clerk#get-started) to create a Convex JWT template.
-4. Uncomment the Clerk provider in `convex/auth.config.ts`
-5. Paste the Issuer URL as `CLERK_JWT_ISSUER_DOMAIN` to your dev deployment environment variable settings on the Convex dashboard (see [docs](https://docs.convex.dev/auth/clerk#configuring-dev-and-prod-instances))
-
-If you want to sync Clerk user data via webhooks, check out this [example repo](https://github.com/thomasballinger/convex-clerk-users-table/).
-
-## Learn more
-
-To learn more about developing your project with Convex, check out:
-
-- The [Tour of Convex](https://docs.convex.dev/get-started) for a thorough introduction to Convex principles.
-- The rest of [Convex docs](https://docs.convex.dev/) to learn about all Convex features.
-- [Stack](https://stack.convex.dev/) for in-depth articles on advanced topics.
-
-## Join the community
-
-Join thousands of developers building full-stack apps with Convex:
-
-- Join the [Convex Discord community](https://convex.dev/community) to get help in real-time.
-- Follow [Convex on GitHub](https://github.com/get-convex/), star and contribute to the open-source implementation of Convex.
-# brightdata-seo-marketing-sass
+| Layer | Tools |
+| --- | --- |
+| App | Next.js, React 19, TypeScript |
+| UI | Tailwind CSS, Radix / shadcn-style components, Recharts, lucide-react |
+| Auth & billing | Clerk  |
+| Backend / DB | Convex queries, mutations, actions, HTTP webhook |
+| Scraping | Bright Data Perplexity scraper |
+| AI | Vercel AI SDK, OpenAI (`gpt-4o`), structured output via Zod |
+| Chat | `app/api/chat/route.ts` + `streamText` |
